@@ -1,5 +1,5 @@
 apiVersion: serving.kserve.io/v1alpha1
-kind: ClusterServingRuntime
+kind: ServingRuntime
 metadata:
   name: nvidia-nim-llama3-70b-instruct-24.05
 spec:
