@@ -1,0 +1,40 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nim-model-store
+spec:
+  template:
+    spec:
+      containers:
+        - name: model-store
+          image: quay.io/xiezhang7/ngc:nim
+          volumeMounts:
+            - mountPath: "/mnt/models"
+              name: model-store
+          env:
+            - name: NGC_CLI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ngc-config
+                  key: ngc-api-key
+            - name: NGC_CLI_ORG
+              valueFrom:
+                secretKeyRef:
+                  name: ngc-config
+                  key: ngc-org
+            - name: MODEL_CACHE_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: nim-model
+                  key: model-cache-path
+            - name: MODEL_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: nim-model
+                  key: model-version
+      volumes:
+        - name: model-store
+          persistentVolumeClaim:
+            claimName: nvidia-nim-pvc
+      restartPolicy: Never

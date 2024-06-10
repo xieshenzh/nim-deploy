@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nim-model
+data:
+  model-cache-path: '/mnt/models'
+  model-version: 'nim/meta/llama3-8b-instruct:0.10.0+cbc614f5-l40sx2-fp8-latency'
