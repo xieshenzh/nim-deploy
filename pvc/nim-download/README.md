@@ -1,8 +1,10 @@
 - Create secret for pulling the image: 
-  ```oc create secret docker-registry ngc-secret \
+  ```
+  oc create secret docker-registry ngc-secret \
   --docker-server=nvcr.io\
   --docker-username='$oauthtoken'\
   --docker-password=${NGC_API_KEY}
+  ```
   
 - Enter the api key in `secret.yaml`. Apply `secret.yaml`, `pvc.yaml` and `job.yaml`.
 
