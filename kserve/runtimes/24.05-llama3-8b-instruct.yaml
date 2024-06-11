@@ -11,7 +11,10 @@ spec:
   containers:
   - env:
     - name: NIM_CACHE_PATH
-      value: /mnt/models/cache
+      value: /tmp
+    - name: NIM_MODEL_NAME
+      # change the folder name to match the folder name in the PVC, e.g. /mnt/models/meta--llama3-8b-instruct-yvejqvt1
+      value: '/mnt/models/<folder name>'
     - name: HF_TOKEN
       valueFrom:
         secretKeyRef:
