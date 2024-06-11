@@ -1,0 +1,80 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nim-model-store
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+        - name: ngc-secret
+      containers:
+        - name: model-store
+          image: nvcr.io/nim/meta/llama3-8b-instruct:1.0.0
+          volumeMounts:
+            - mountPath: "/tmp"
+              name: model-store
+            - mountPath: /dev/shm
+              name: dshm
+          env:
+            - name: NGC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ngc-config
+                  key: ngc-api-key
+            - name: NIM_CACHE_PATH
+              value: /tmp
+            - name: K_REVISION
+              value: llama3-8b-instruct-1xgpu-predictor-00001
+            - name: K_CONFIGURATION
+              value: llama3-8b-instruct-1xgpu-predictor
+            - name: K_SERVICE
+              value: llama3-8b-instruct-1xgpu-predictor
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            runAsUser: 1001090000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "12"
+              memory: 256Gi
+              nvidia.com/gpu: "1"
+            requests:
+              cpu: "12"
+              memory: 128Gi
+              nvidia.com/gpu: "1"
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+        - key: odh-notebook
+          operator: Exists
+          effect: NoSchedule
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 300
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 300
+        - key: node.kubernetes.io/memory-pressure
+          operator: Exists
+          effect: NoSchedule
+      nodeSelector:
+        node.kubernetes.io/instance-type: p4d.24xlarge
+      volumes:
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 128Gi
+          name: dshm
+        - name: model-store
+          persistentVolumeClaim:
+            claimName: nvidia-nim-pvc
+      restartPolicy: Never
